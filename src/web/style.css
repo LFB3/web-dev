@@ -1,0 +1,7 @@
+@import "http://127.0.0.1:3000/colors.css";
+
+* {
+    background-color: var(--ctp-base);
+    color: var(--ctp-text);
+    text-align: center;
+}
