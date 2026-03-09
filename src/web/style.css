@@ -5,3 +5,15 @@
     color: var(--ctp-text);
     text-align: center;
 }
+
+body, html {
+  margin: 0;
+  padding: 0;
+  height: 100%; /* Wichtig, damit die Tabelle eine Referenz hat */
+}
+
+table {
+  width: 100vw;  /* Nutzt 100% der Bildschirmbreite */
+  border-collapse: collapse;
+  table-layout: fixed; /* Sorgt dafür, dass Spalten sich den Platz gleichmäßig teilen */
+}

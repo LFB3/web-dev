@@ -1,14 +1,11 @@
 const { OSUtils } = require('node-os-utils');
 const path = require('path');
 const express = require('express');
+const { exec } = require('child_process');
 
 const app = express();
 const osutils = new OSUtils();
 app.use(express.json());
-
-
-
-
 
 app.get('/api/connectiontest', async (req, res) => {
     res.json({
@@ -64,6 +61,53 @@ app.get('/api/ram', async (req, res) => {
         }
     } catch (error) {
         console.error("Error while trying to access Memory Info:", error);
+        res.status(500).json({
+            success: false,
+            error: error.message
+        });
+    }
+});
+
+app.get('/api/disk', async (req, res) => {
+    try {
+        const disk = await osutils.disk.usageByMountPoint('/');
+        if (disk.success) {
+            res.status(200).json({
+                success: true,
+                data: {
+                    filesystem: disk.data.filesystem,
+                    total: disk.data.total.bytes,
+                    available: disk.data.available.bytes,
+                    usage: disk.data.usagePercentage
+                }
+                
+            });
+        }
+    } catch (error) {
+        console.error("Error while trying to access Disk Info:", error);
+        res.status(500).json({
+            success: false,
+            error: error.message
+        });
+    }
+});
+
+app.get('/api/container', async (req, res) => {
+    try {
+        exec('docker ps', (error, stdout, stderr) => {
+            if (error) {
+                console.error('Error executing command:', error);
+                res.status(500).json({
+                    success: false,
+                    error: error.message
+                });
+                return;
+            }
+            console.log(`Running containers:\n`, stdout);
+            res.json
+        });
+    } catch (error) {
+        console.error("Error while trying to get Docker container info:", error);
         res.status(500).json({
             success: false,
             error: error.message
