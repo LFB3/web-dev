@@ -2,6 +2,8 @@ const { OSUtils } = require('node-os-utils');
 const path = require('path');
 const express = require('express');
 const { exec } = require('child_process');
+const util = require('util');
+const execAsync = util.promisify(exec);
 
 const app = express();
 const osutils = new OSUtils();
@@ -92,28 +94,44 @@ app.get('/api/disk', async (req, res) => {
     }
 });
 
-app.get('/api/container', async (req, res) => {
+
+app.get('/api/docker', async (req, res) => {
     try {
-        exec('docker ps', (error, stdout, stderr) => {
-            if (error) {
-                console.error('Error executing command:', error);
-                res.status(500).json({
-                    success: false,
-                    error: error.message
-                });
-                return;
-            }
-            console.log(`Running containers:\n`, stdout);
-            res.json
-        });
+        // 1. IDs holen
+        const { stdout } = await execAsync(`docker ps --format '{"id":"{{.ID}}"}'`);
+        const data = stdout.trim().split(/\n/).filter(line => line).map(line => JSON.parse(line));
+        
+        const allOutputs = await Promise.all(data.map(async ({ id }) => {
+            const { stdout: statsOut } = await execAsync(`docker stats ${id} --no-stream --format "{{json .}}"`);
+            const stats = JSON.parse(statsOut);
+            
+            const { stdout: inspectOut } = await execAsync(`docker inspect ${id} --format "{{json .}}"`);
+            const inspect = JSON.parse(inspectOut);
+            
+            const [netI, netO] = stats.NetIO.split(" / ");
+            const startedRaw = inspect.State.StartedAt;
+            const startedClean = startedRaw.split('.')[0];
+            return {
+                name: inspect.Name.replace(/^\//, ''),
+                image: inspect.Config.Image,
+                status: inspect.State.Status,
+                started: startedClean,
+                cpuUsage: stats.CPUPerc,
+                ramPercentage: stats.MemPerc,
+                ramUsage: stats.MemUsage,
+                netI: netI,
+                netO: netO
+            };
+        }));
+
+        res.json(allOutputs);
+
     } catch (error) {
-        console.error("Error while trying to get Docker container info:", error);
-        res.status(500).json({
-            success: false,
-            error: error.message
-        });
+        console.error('Error executing command:', error);
+        res.status(500).json({ error: error.message });
     }
 });
+
 app.listen(3000, () => {
     console.log('Server startet')
 })

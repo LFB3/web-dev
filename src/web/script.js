@@ -72,11 +72,52 @@ async function fetchDiskUsage() {
         cpu.textContent = 'Error!';
     }
 }
+async function fetchDockerInfo() {
+    try {
+        const response = await fetch('http://127.0.0.1:3000/api/docker');
+
+        if (!response.ok) {
+            throw new Error('Network Error Code was not 200');
+        }
+
+        const data = await response.json();   // ← FEHLTE
+
+        const tableBody = document.querySelector("#container tbody");
+        const headers = document.querySelectorAll("#container thead th");
+
+        tableBody.innerHTML = "";
+
+        data.forEach(container => {
+            const row = document.createElement("tr");
+
+            headers.forEach(header => {
+                const key = header.id;
+                const cell = document.createElement("td");
+
+                let value = container[key];
+
+                if (key === "started" && value) {
+                    value = new Date(value).toLocaleString('de-DE');
+                }
+
+                cell.textContent = value || "-";
+                row.appendChild(cell);
+            });
+
+            tableBody.appendChild(row);
+        });
+
+    } catch (error) {
+        console.error('Error while trying to access Docker data:', error);
+    }
+}
 fetchCpuUsage()
 fetchRamUsage()
 fetchDiskUsage()
+fetchDockerInfo()
 const loop = setInterval(async () => {
     fetchCpuUsage()
     fetchRamUsage()
     fetchDiskUsage()
+    fetchDockerInfo()
 }, 6000);
