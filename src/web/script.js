@@ -1,7 +1,7 @@
 const cpu = document.getElementById('cpu');
 async function fetchCpuUsage() {
     try {
-        const response = await fetch('http://127.0.0.1:3000/api/cpu');
+        const response = await fetch('https://lucafb.de/api/cpu');
 
         if (!response.ok) {
             throw new Error('Network Error Code was not 200');
@@ -39,7 +39,7 @@ function memoryFormatter(bytes) {
 }
 async function fetchRamUsage() {
     try {
-        const response = await fetch('http://127.0.0.1:3000/api/ram');
+        const response = await fetch('https://lucafb.de/api/ram');
 
         if (!response.ok) {
             throw new Error('Network Error Code was not 200');
@@ -56,7 +56,7 @@ async function fetchRamUsage() {
 }
 async function fetchDiskUsage() {
     try {
-        const response = await fetch('http://127.0.0.1:3000/api/disk');
+        const response = await fetch('https://lucafb.de/api/disk');
 
         if (!response.ok) {
             throw new Error('Network Error Code was not 200');
@@ -74,7 +74,7 @@ async function fetchDiskUsage() {
 }
 async function fetchDockerInfo() {
     try {
-        const response = await fetch('http://127.0.0.1:3000/api/docker');
+        const response = await fetch('https://lucafb.de/api/docker');
 
         if (!response.ok) {
             throw new Error('Network Error Code was not 200');
