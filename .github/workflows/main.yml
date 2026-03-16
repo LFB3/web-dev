@@ -16,7 +16,7 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            cd /home/github/web-dev
+            cd /home/luca/web-dev
             git pull origin main
             npm install --omit=dev
             sudo systemctl restart webserver
